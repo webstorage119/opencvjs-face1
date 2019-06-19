@@ -6,10 +6,10 @@
 <script src="https://docs.opencv.org/master/utils.js" type="text/javascript"></script>
 
 <script type='text/javascript'>
-  cv['onRuntimeInitialized']=()=>{
+  cv['onRuntimeInitialized'] = function initDetection() {
     // Create a camera object.
-    var output = document.getElementById('output');
-    var camera = document.createElement("video");
+    const output = document.getElementById('output');
+    const camera = document.createElement("video");
     camera.setAttribute("width", 640);
     camera.setAttribute("height", 480);
 
@@ -21,6 +21,9 @@
         camera.play();
       };
     });
+    
+    function getCameraPermission(camera) {
+    }
 
     // Open camera stream and start a capturing loop.
     var cap = new cv.VideoCapture(camera);
@@ -29,7 +32,7 @@
     var net;
 
     function captureFrame() {
-      var begin = Date.now();
+      //var begin = Date.now();
       cap.read(frame);  // Read a frame from camera
       
       cv.cvtColor(frame, frameBGR, cv.COLOR_RGBA2BGR);
@@ -54,15 +57,25 @@
       setTimeout(captureFrame, 0);
     };
 
-    // Download models
-    var utils = new Utils('');
-    utils.createFileFromUrl("opencv_face_detector.prototxt", "opencv_face_detector.prototxt", () => {
-      utils.createFileFromUrl("opencv_face_detector.caffemodel", "opencv_face_detector.caffemodel", () => {
-        net = cv.readNet("opencv_face_detector.prototxt", "opencv_face_detector.caffemodel");
-        captureFrame();
-      });
-    });
-  };
+    downloadModels();
+  }
+  
+ function downloadModels() {  
+    const utils = new Utils('');
+    utils.createFileFromUrl(
+      "opencv_face_detector.prototxt",
+      "opencv_face_detector.prototxt",
+      () => utils.createFileFromUrl(
+          "opencv_face_detector.caffemodel",
+          "opencv_face_detector.caffemodel",
+          () => {
+            net = cv.readNet("opencv_face_detector.prototxt", "opencv_face_detector.caffemodel");
+            captureFrame();
+          }
+        )
+    );
+  }
+  
 </script>
 
 </head>
