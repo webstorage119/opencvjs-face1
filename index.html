@@ -121,13 +121,16 @@ function createProcessingStep(models) {
 
 
 function drawBoundingBoxes(frame, boundingBoxes, color) {
-  boundingBoxes.forEach( box =>
+  boundingBoxes.forEach( box => {
+    console.dir(box);
+
     cv.rectangle(
       frame,
       {x: box.left, y: box.top},
       {x: box.right, y: box.bottom}, 
       color
-    )
+    );
+  }
   );
 }
 
