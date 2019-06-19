@@ -166,7 +166,8 @@ function createProcessingStep(models) {
     if(faceBounds.length > 0) {
       const faceBound = faceBounds[0];
       const net = models.ageGender;
-      const blob = cv.blobFromImage(processedFram, 1, {width: 62, height: 62});
+      console.dir(net);
+      const blob = cv.blobFromImage(processedFrame, 1, {width: 62, height: 62});
       net.setInput(blob);
       const out = net.forward();
       console.log(out);
