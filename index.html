@@ -108,11 +108,9 @@ function createProcessingStep(models) {
 
     const processedFrame = frame.clone();
     cv.cvtColor(frame, processedFrame, cv.COLOR_RGBA2BGR);
-    const blob = cv.blobFromImage(processedFrame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
-
 
     const confidenceThreshold = 0.3;
-    const faceBounds = getFacesBoundingBoxes(blob, models.faceDetection, confidenceThreshold);
+    const faceBounds = getFacesBoundingBoxes(frame, models.faceDetection, confidenceThreshold);
 
     console.dir(faceBounds);
 
@@ -125,8 +123,10 @@ function createProcessingStep(models) {
 }
 
 
-    function getFacesBoundingBoxes(blob, net, thresh) {
+    function getFacesBoundingBoxes(frame, net, thresh) {
       const faceBounds = [];
+
+      const blob = cv.blobFromImage(processedFrame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
 
       net.setInput(blob);
       const out = net.forward();
