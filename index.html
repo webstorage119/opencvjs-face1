@@ -145,7 +145,7 @@ function getFacesBoundingBoxes(frame, net, thresh) {
       let left = out.data32F[i + 3] * frame.cols;
       let top = out.data32F[i + 4] * frame.rows;
       let right = out.data32F[i + 5] * frame.cols;
-      let bottom = out.data32F[i + 6] * frame.row;
+      let bottom = out.data32F[i + 6] * frame.rows;
       const width = right - left;
       const height = bottom - top;
 
@@ -159,7 +159,7 @@ function getFacesBoundingBoxes(frame, net, thresh) {
       left: (left > 0) ? left : 0,
       right: (right < frame.width) ? right : frame.cols,
       top: (top > 0) ? top : 0,
-      bottom: (bottom < frame.height) ? bottom : frame.width
+      bottom: (bottom < frame.height) ? bottom : frame.rows
     });
 
   }
