@@ -78,7 +78,7 @@ function downloadAgeGenderNet() {
     new Promise( (resolve, reject) => {
       console.log('bin download');
       try {
-        utils.createFileFromUrl(ageGenderPaths.bin, ageGenderPaths.bin, resolve)
+        utils.createFileFromUrl(ageGenderPaths.bin, ageGenderPaths.bin, resolve);
       } catch(err) {
         console.log(err);
         reject(err);
