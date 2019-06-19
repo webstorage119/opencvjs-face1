@@ -76,7 +76,7 @@ function captureFrame(cameraStream, frameBuffer, outputElement, processingStep) 
   cv.imshow(outputElement, processedFrame); 
   processedFrame.delete();
 
-  const frameTimeout = 0;
+  const frameTimeout = 100;
   setTimeout(
     () => captureFrame(cameraStream, frameBuffer, outputElement, processingStep),
     frameTimeout
