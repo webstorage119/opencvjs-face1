@@ -114,9 +114,6 @@ function createProcessingStep(models) {
 
     drawBoundingBoxes(processedFrame, faceBounds, [0, 255, 0, 255]);
 
-
-
-
     cv.cvtColor(processedFrame, processedFrame, cv.COLOR_BGR2RGBA);
     return processedFrame;
   };
@@ -145,11 +142,24 @@ function getFacesBoundingBoxes(frame, net, thresh) {
   for (let i = 0, n = out.data32F.length; i < n; i += 7) {
     const confidence = out.data32F[i + 2];
     if (confidence < thresh) { continue; }
+      let left = out.data32F[i + 3] * frame.cols,
+      let top = out.data32F[i + 4] * frame.rows,
+      let right = out.data32F[i + 5] * frame.cols,
+      let bottom = out.data32F[i + 6] * frame.rows
+      const width = right - left;
+      const height = bottom - top;
+
+      const scale = 0.25;
+      left -= scale*width;
+      right += scale*width;
+      top -= scale*height;
+      bottom += scale*height;
+
     faceBounds.push({
-      left: out.data32F[i + 3] * frame.cols,
-      top: out.data32F[i + 4] * frame.rows,
-      right: out.data32F[i + 5] * frame.cols,
-      bottom: out.data32F[i + 6] * frame.rows
+      left: (left > 0) ? left : 0,
+      right: (right < frame.width) ? right : frame.width,
+      top: (top > 0) ? top : 0,
+      bottom: (bottom < frame.height) ? bottom : frame.height
     });
 
   }
