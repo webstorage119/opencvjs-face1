@@ -69,24 +69,24 @@ function downloadModels() {
 }
 
 
-function captureFrame(cameraStream, frameBuffer, outputElement, processingStep) {
+function captureFrame(cameraStream, frameBuffer1, outputElement, processingStep) {
 
-  //let frameBuffer = new cv.Mat(cameraStream.video.videoHeight, cameraStream.video.videoWidth, cv.CV_8UC4);
-  //console.log('captureFrame called');
-  console.dir({
-    height: cameraStream.video.videoHeight,
-    width: cameraStream.video.videoWidth
-  });
+  const width = cameraStream.video.videoHeight;
+  const height = cameraStream.video.videoWidth;
 
-  cameraStream.read(frameBuffer);
-  const processedFrame = processingStep(frameBuffer);
-  cv.imshow(outputElement, processedFrame); 
-  processedFrame.delete();
-  //frameBuffer.delete();
+  if( (width > 0) && (height > 0)) {
+    let frameBuffer = new cv.Mat(height, width, cv.CV_8UC4);
+
+    cameraStream.read(frameBuffer);
+    const processedFrame = processingStep(frameBuffer);
+    cv.imshow(outputElement, processedFrame); 
+    processedFrame.delete();
+    frameBuffer.delete();
+  }
 
   const frameTimeout = 0;
-  // Repeat every 50ms
-  setTimeout(() => captureFrame(cameraStream, frameBuffer, outputElement, processingStep), frameTimeout);
+  // Repeat at timeout
+  setTimeout(() => captureFrame(cameraStream, frameBuffer1, outputElement, processingStep), frameTimeout);
 };
 
 
