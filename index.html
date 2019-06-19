@@ -69,12 +69,15 @@ function downloadModels() {
 }
 
 
-function captureFrame(cameraStream, frameBuffer, outputElement, processingStep) {
+function captureFrame(cameraStream, frameBuffer1, outputElement, processingStep) {
+
+  let frameBuffer = new cv.Mat(cameraStream.video.videoHeight, cameraStream.video.videoWidth, cv.CV_8UC4);
   //console.log('captureFrame called');
   cameraStream.read(frameBuffer);
   const processedFrame = processingStep(frameBuffer);
   cv.imshow(outputElement, processedFrame); 
   processedFrame.delete();
+  frameBuffer.delete();
 
   const frameTimeout = 0;
   // Repeat every 50ms
