@@ -25,7 +25,7 @@
               processingStep: processingStep
             })
           ).then(
-            objs => captureFrame(objs.cameraStream, cameraElement, objs.processingStep)
+            objs => captureFrame(objs.cameraStream, outputElement, objs.processingStep)
           ).then(
             () => console.log('capturing started')
           );
@@ -89,7 +89,6 @@ function createProcessingStep(models) {
     const processedFrame = frame.clone();
     cv.cvtColor(frame, processedFrame, cv.COLOR_RGBA2BGR);
     const blob = cv.blobFromImage(processedFrame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
-
 
     const net = models.faceDetectionNet;
     net.setInput(blob);
