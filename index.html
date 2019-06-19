@@ -1,91 +1,107 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-<script src="https://docs.opencv.org/master/opencv.js" type="text/javascript"></script>
-<script src="https://docs.opencv.org/master/utils.js" type="text/javascript"></script>
+  <head>
+    <script src="https://docs.opencv.org/master/opencv.js" type="text/javascript"></script>
+    <script src="https://docs.opencv.org/master/utils.js" type="text/javascript"></script>
 
-<script type='text/javascript'>
-  cv['onRuntimeInitialized'] = function initDetection() {
-    // Create a camera object.
-    const output = document.getElementById('output');
-    const camera = document.createElement("video");
-    camera.setAttribute("width", 640);
-    camera.setAttribute("height", 480);
+    <script type='text/javascript'>
+      cv['onRuntimeInitialized'] = function initDetection() {
+        // Create a camera object.
 
-    // Get a permission from user to use a camera.
-    navigator.mediaDevices.getUserMedia({video: true, audio: false})
-      .then(function(stream) {
-      camera.srcObject = stream;
-      camera.onloadedmetadata = function(e) {
-        camera.play();
-      };
-    });
+        const captureHeight = 480;
+        const captureWidth = 640;
 
-    // Open camera stream and start a capturing loop.
-    var cap = new cv.VideoCapture(camera);
-    var frame = new cv.Mat(camera.height, camera.width, cv.CV_8UC4);
-    var frameBGR = new cv.Mat(camera.height, camera.width, cv.CV_8UC3);
-    var net;
+        const output = document.getElementById('output');
+        const camera = document.createElement("video");
 
-    
-    
-    
-    downloadModels();
-    
-    
-    
-    function captureFrame() {
-      //var begin = Date.now();
-      cap.read(frame);  // Read a frame from camera
-      
-      cv.cvtColor(frame, frameBGR, cv.COLOR_RGBA2BGR);
-      var blob = cv.blobFromImage(frameBGR, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
-      net.setInput(blob);
-      var out = net.forward();
-      for (var i = 0, n = out.data32F.length; i < n; i += 7) {
-        var confidence = out.data32F[i + 2];
-        if (confidence < 0.5) { continue; }
-        var left = out.data32F[i + 3] * frame.cols;
-        var top = out.data32F[i + 4] * frame.rows;
-        var right = out.data32F[i + 5] * frame.cols;
-        var bottom = out.data32F[i + 6] * frame.rows;
-        cv.rectangle(frame, {x: left, y: top}, {x: right, y: bottom}, [0, 255, 0, 255]);
-      }
-      blob.delete();
-      out.delete();
+        (
+          function setupCamera(camera, height, width) {
+            camera.setAttribute("width", width);
+            camera.setAttribute("height", height);
 
-      // Visualize frame
-      cv.imshow(output, frame);
+            // Get a permission from user to use a camera.
+            navigator.mediaDevices.getUserMedia({video: true, audio: false})
+              .then(function(stream) {
+                camera.srcObject = stream;
+                camera.onloadedmetadata = function(e) {
+                  camera.play();
+                };
+              });
 
-      setTimeout(captureFrame, 0);
-    };
-
-    
-    function downloadModels() {  
-      const utils = new Utils('');
-      utils.createFileFromUrl(
-      "opencv_face_detector.prototxt",
-      "opencv_face_detector.prototxt",
-      () => utils.createFileFromUrl(
-        "opencv_face_detector.caffemodel",
-        "opencv_face_detector.caffemodel",
-        () => {
-              net = cv.readNet("opencv_face_detector.prototxt", "opencv_face_detector.caffemodel");
-              captureFrame();
+            // return open camera stream
+           return new cv.VideoCapture(camera);
           }
-        )
-      );
-    }
-    
-    
-  } 
-</script>
+        )(camera, captureHeight, captureWidth);
 
-</head>
+        let frame = new cv.Mat(camera.height, camera.width, cv.CV_8UC4);
+        let frameBGR = new cv.Mat(camera.height, camera.width, cv.CV_8UC3);
+        let net;
 
-<body>
-  <canvas id="output" width=640 height=480 style="max-width: 100%"></canvas>
-</body>
+
+
+
+        downloadModels()
+          .then(setupCameraStream)
+          .then(cameraStream => captureFrame(cameraStream, output))
+          .then(() => console.log('capturing started'));
+
+
+        function captureFrame(cameraStream, outputElement) {
+          cameraStream.read(frame);  // Read a frame from camera
+
+          cv.cvtColor(frame, frameBGR, cv.COLOR_RGBA2BGR);
+          const blob = cv.blobFromImage(frameBGR, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
+          net.setInput(blob);
+          const out = net.forward();
+          for (let i = 0, n = out.data32F.length; i < n; i += 7) {
+            const confidence = out.data32F[i + 2];
+            if (confidence < 0.5) { continue; }
+            const left = out.data32F[i + 3] * frame.cols;
+            const top = out.data32F[i + 4] * frame.rows;
+            const right = out.data32F[i + 5] * frame.cols;
+            const bottom = out.data32F[i + 6] * frame.rows;
+            cv.rectangle(frame, {x: left, y: top}, {x: right, y: bottom}, [0, 255, 0, 255]);
+          }
+          blob.delete();
+          out.delete();
+
+          // Visualize frame
+          cv.imshow(output, frame);
+
+          setTimeout(
+            () => captureFrame(cameraStreaa, output),
+            50 
+          );
+        };
+
+
+        function downloadModels() {  
+          return new Promise((resolve, reject) => {
+            const utils = new Utils('');
+            utils.createFileFromUrl(
+              "opencv_face_detector.prototxt",
+              "opencv_face_detector.prototxt",
+              () => utils.createFileFromUrl(
+                "opencv_face_detector.caffemodel",
+                "opencv_face_detector.caffemodel",
+                () => {
+                  net = cv.readNet("opencv_face_detector.prototxt", "opencv_face_detector.caffemodel");
+                  resolve();
+                }
+              )
+            );
+          });
+        }
+
+
+      } 
+    </script>
+
+  </head>
+
+  <body>
+    <canvas id="output" width=640 height=480 style="max-width: 100%"></canvas>
+  </body>
 
 </html>
