@@ -51,10 +51,14 @@ function downloadModels() {
       utils.createFileFromUrl(faceDetectionPaths.caffe, faceDetectionPaths.caffe, resolve)
     )
   ])
-    .then(() => ({
-        faceDetection: cv.readNet(faceDetectionPaths.proto, faceDetectionPaths.caffe)
-      })
+    .then(
+      () => cv.readNet(faceDetectionPaths.proto, faceDetectionPaths.caffe)
     );
+
+  return Promise.all([downloadFaceDetectionPromise])
+    .then(nets => ({
+      faceDetection: nets[0]
+    });
 }
 
 
