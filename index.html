@@ -157,9 +157,9 @@ function getFacesBoundingBoxes(frame, net, thresh) {
 
     faceBounds.push({
       left: (left > 0) ? left : 0,
-      right: (right < frame.width) ? right : frame.cols,
+      right: (right < frame.cols) ? right : frame.cols,
       top: (top > 0) ? top : 0,
-      bottom: (bottom < frame.height) ? bottom : frame.rows
+      bottom: (bottom < frame.rows) ? bottom : frame.rows
     });
 
   }
