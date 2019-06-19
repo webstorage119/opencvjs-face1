@@ -101,7 +101,17 @@ function downloadAgeGenderNet() {
     xmlDownloadPromise
   ])
     .then(
-      () => cv.readNet(ageGenderPaths.bin, ageGenderPaths.xml)
+      () => {
+        let net; 
+        console.log('reading net');
+        try {
+          net = cv.readNet(ageGenderPaths.bin, ageGenderPaths.xml);
+        } catch(err) {
+          console.error(err);
+        }
+
+        return net;
+      }
     );
 }
 
