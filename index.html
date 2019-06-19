@@ -28,7 +28,10 @@ function initDetection() {
         processingStep: processingStep
       })
     ).then(
-      objs => captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep)
+      objs => {
+        console.dir(objs.cameraStream);
+        return captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep);
+      }
     ).then(
       () => console.log('capturing started')
     );
@@ -66,24 +69,17 @@ function downloadModels() {
 }
 
 
-function captureFrame(cameraStream, frameBuffer1, outputElement, processingStep) {
-
-  const width = cameraStream.video.videoHeight;
-  const height = cameraStream.video.videoWidth;
-
-  if( (width > 0) && (height > 0)) {
-    let frameBuffer = new cv.Mat(height, width, cv.CV_8UC4);
-
-    cameraStream.read(frameBuffer);
-    const processedFrame = processingStep(frameBuffer);
-    cv.imshow(outputElement, processedFrame); 
-    processedFrame.delete();
-    frameBuffer.delete();
-  }
+function captureFrame(cameraStream, frameBuffer, outputElement, processingStep) {
+  cameraStream.read(frameBuffer);
+  const processedFrame = processingStep(frameBuffer);
+  cv.imshow(outputElement, processedFrame); 
+  processedFrame.delete();
 
   const frameTimeout = 0;
-  // Repeat at timeout
-  setTimeout(() => captureFrame(cameraStream, frameBuffer1, outputElement, processingStep), frameTimeout);
+  setTimeout(
+    () => captureFrame(cameraStream, frameBuffer, outputElement, processingStep),
+    frameTimeout
+  );
 };
 
 
