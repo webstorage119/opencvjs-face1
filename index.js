@@ -30,11 +30,11 @@ function downloadModels() {
 
   return Promise.all([
     downloadFaceDetectionNet(),
-    //downloadAgeGenderNet()
+    downloadAgeGenderNet()
   ])
     .then(nets => ({
       faceDetection: nets[0],
-      //ageGender: nets[1]
+      ageGender: nets[1]
     })
     );
 }
