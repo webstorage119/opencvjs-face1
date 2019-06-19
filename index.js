@@ -30,11 +30,11 @@ function downloadModels() {
 
   return Promise.all([
     downloadFaceDetectionNet(),
-    downloadAgeGenderNet()
+    //downloadAgeGenderNet()
   ])
     .then(nets => ({
       faceDetection: nets[0],
-      ageGender: nets[1]
+      //ageGender: nets[1]
     })
     );
 }
@@ -67,8 +67,8 @@ function downloadAgeGenderNet() {
   console.log('Downloading age/gender network');
 
   const ageGenderPaths = {
-    bin: 'age-gender-recognition-retail-0013.bin',
-    xml: 'age-gender-recognition-retail-0013.xml'
+    xml: 'age-gender-recognition-retail-0013.bin',
+    bin: 'age-gender-recognition-retail-0013.xml'
   };
 
   const utils = new Utils('');
