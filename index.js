@@ -31,6 +31,19 @@ function initDetection() {
 function downloadModels() {  
   //console.log('download models started');
 
+  return Promise.all([
+    downloadFaceDetectionNet(),
+    downloadAgeGenderNet()
+  ])
+  .then(nets => ({
+      faceDetection: nets[0],
+      ageGender: nets[1]
+    })
+  );
+}
+
+
+function downloadFaceDetectionNet() {
   const faceDetectionPaths = {
     proto: "opencv_face_detector.prototxt",
     caffe: "opencv_face_detector.caffemodel"
@@ -38,7 +51,7 @@ function downloadModels() {
 
   const utils = new Utils('');
 
-  const downloadFaceDetectionPromise = Promise.all([
+ return Promise.all([
     new Promise( (resolve, reject) =>
       utils.createFileFromUrl(faceDetectionPaths.proto, faceDetectionPaths.proto, resolve)
     ),
@@ -49,11 +62,26 @@ function downloadModels() {
     .then(
       () => cv.readNet(faceDetectionPaths.proto, faceDetectionPaths.caffe)
     );
+}
 
-  return Promise.all([downloadFaceDetectionPromise])
-    .then(nets => ({
-      faceDetection: nets[0]
-    })
+function downloadAgeGenderNet() {
+  const ageGenderPaths = {
+    bin: 'age-gender-recognition-retail-0013.bin',
+    xml: 'age-gender-recognition-retail-0013.xml'
+  };
+
+  const utils = new Utils('');
+
+ return Promise.all([
+    new Promise( (resolve, reject) =>
+      utils.createFileFromUrl(ageGenderPaths.bin, ageGenderPaths.bin, resolve)
+    ),
+    new Promise( (resolve, reject) =>
+      utils.createFileFromUrl(ageGenderPaths.xml, ageGenderPaths.xml, resolve)
+    )
+  ])
+    .then(
+      () => cv.readNet(ageGenderPaths.xml, ageGenderPaths.bin)
     );
 }
 
@@ -71,7 +99,6 @@ function captureFrame(cameraStream, frameBuffer, outputElement, processingStep) 
     frameTimeout
   );
 };
-
 
 
 function setupCameraStream(cameraElement, height, width) {
@@ -101,7 +128,19 @@ function createProcessingStep(models) {
     const confidenceThreshold = 0.5;
     const faceBounds = getFacesBoundingBoxes(processedFrame, models.faceDetection, confidenceThreshold);
 
+    if(faceBounds.length > 0) {
+      const faceBound = faceBounds[0];
+      const net = models.ageGender;
+      const blob = cv.blobFromImage(processedFram, 1, {width: 62, height: 62});
+      net.setInput(blob);
+      const out = net.forward();
+      console.log(out);
+
+    }
+
+    
     drawBoundingBoxes(processedFrame, faceBounds, [0, 255, 0, 255]);
+
 
     cv.cvtColor(processedFrame, processedFrame, cv.COLOR_BGR2RGBA);
     return processedFrame;
