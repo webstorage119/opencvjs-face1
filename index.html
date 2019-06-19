@@ -121,21 +121,17 @@ function createProcessingStep(models) {
 
 
 function drawBoundingBoxes(frame, boundingBoxes, color) {
-  boundingBoxes.forEach( box => {
-    console.dir(box);
-
+  boundingBoxes.forEach( box => 
     cv.rectangle(
       frame,
       {x: box.left, y: box.top},
       {x: box.right, y: box.bottom}, 
       color
-    );
-  }
+    )
   );
 }
 
 function getFacesBoundingBoxes(frame, net, thresh) {
-  console.dir(frame);
   const faceBounds = [];
 
   const blob = cv.blobFromImage(frame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
@@ -161,16 +157,15 @@ function getFacesBoundingBoxes(frame, net, thresh) {
 
     faceBounds.push({
       left: (left > 0) ? left : 0,
-      right: (right < frame.width) ? right : frame.width,
+      right: (right < frame.width) ? right : frame.cols,
       top: (top > 0) ? top : 0,
-      bottom: (bottom < frame.height) ? bottom : frame.height
+      bottom: (bottom < frame.height) ? bottom : frame.width
     });
 
   }
   blob.delete();
   out.delete();
 
-  console.log(faceBounds);
   return faceBounds;
 }
     </script>
