@@ -58,7 +58,8 @@ function downloadModels() {
   return Promise.all([downloadFaceDetectionPromise])
     .then(nets => ({
       faceDetection: nets[0]
-    });
+      })
+    );
 }
 
 
