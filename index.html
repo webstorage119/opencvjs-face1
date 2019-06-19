@@ -110,7 +110,7 @@ function createProcessingStep(models) {
     cv.cvtColor(frame, processedFrame, cv.COLOR_RGBA2BGR);
 
     const confidenceThreshold = 0.3;
-    const faceBounds = getFacesBoundingBoxes(frame, models.faceDetection, confidenceThreshold);
+    const faceBounds = getFacesBoundingBoxes(processedFrame, models.faceDetection, confidenceThreshold);
 
     console.dir(faceBounds);
 
