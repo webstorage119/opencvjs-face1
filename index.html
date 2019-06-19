@@ -25,7 +25,7 @@
               processingStep: processingStep
             })
           ).then(
-            objs => captureFrame(objs.cameraStream, outputElement, objs.processingStep)
+            objs => captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep)
           ).then(
             () => console.log('capturing started')
           );
