@@ -18,7 +18,6 @@ function initDetection() {
 
 
   let frameBuffer = new cv.Mat(captureHeight, captureWidth, cv.CV_8UC4);
-  console.dir(frameBuffer);
 
 
   downloadModels()
@@ -29,7 +28,10 @@ function initDetection() {
         processingStep: processingStep
       })
     ).then(
-      objs => captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep)
+      objs => {
+        console.dir(objs.cameraStream);
+        return captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep);
+      }
     ).then(
       () => console.log('capturing started')
     );
