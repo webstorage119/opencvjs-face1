@@ -76,7 +76,7 @@ function captureFrame(cameraStream, frameBuffer, outputElement, processingStep) 
   cv.imshow(outputElement, processedFrame); 
   processedFrame.delete();
 
-  const frameTimeout = 100;
+  const frameTimeout = 30;
   setTimeout(
     () => captureFrame(cameraStream, frameBuffer, outputElement, processingStep),
     frameTimeout
@@ -90,7 +90,7 @@ function setupCameraStream(cameraElement, height, width) {
   cameraElement.setAttribute('height', height);
 
   // Get a permission from user to use a cameraElement.
-    navigator.mediaDevices.getUserMedia({video: true, audio: false})
+  navigator.mediaDevices.getUserMedia({video: true, audio: false})
     .then((stream) => {
       cameraElement.srcObject = stream;
       cameraElement.onloadedmetadata = e => cameraElement.play();
@@ -112,9 +112,9 @@ function createProcessingStep(models) {
     const confidenceThreshold = 0.3;
     const faceBounds = getFacesBoundingBoxes(processedFrame, models.faceDetection, confidenceThreshold);
 
-    console.dir(faceBounds);
+    drawBoundingBoxes(processedFrame, faceBounds, [0, 255, 0, 255]);
 
-    //cv.rectangle(processedFrame, {x: left, y: top}, {x: right, y: bottom}, [0, 255, 0, 255]);
+
 
 
     cv.cvtColor(processedFrame, processedFrame, cv.COLOR_BGR2RGBA);
@@ -122,6 +122,17 @@ function createProcessingStep(models) {
   };
 }
 
+
+function drawBoundingBoxes(frame, boundingBoxes, color) {
+  boundingBoxes.forEach( box =>
+    cv.rectangle(
+      frame,
+      {x: box.left, y: box.top},
+      {x: box.right, y: box.bottom}, 
+      color
+    )
+  );
+}
 
 function getFacesBoundingBoxes(frame, net, thresh) {
   const faceBounds = [];
