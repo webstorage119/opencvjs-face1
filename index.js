@@ -81,7 +81,7 @@ function downloadAgeGenderNet() {
     )
   ])
     .then(
-      () => cv.readNet(ageGenderPaths.xml, ageGenderPaths.bin)
+      () => cv.readNet(ageGenderPaths.bin, ageGenderPaths.xml)
     );
 }
 
