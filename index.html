@@ -21,9 +21,6 @@
         camera.play();
       };
     });
-    
-    function getCameraPermission(camera) {
-    }
 
     // Open camera stream and start a capturing loop.
     var cap = new cv.VideoCapture(camera);
@@ -31,6 +28,13 @@
     var frameBGR = new cv.Mat(camera.height, camera.width, cv.CV_8UC3);
     var net;
 
+    
+    
+    
+    downloadModels();
+    
+    
+    
     function captureFrame() {
       //var begin = Date.now();
       cap.read(frame);  // Read a frame from camera
@@ -57,25 +61,25 @@
       setTimeout(captureFrame, 0);
     };
 
-    downloadModels();
-  }
-  
- function downloadModels() {  
-    const utils = new Utils('');
-    utils.createFileFromUrl(
+    
+    function downloadModels() {  
+      const utils = new Utils('');
+      utils.createFileFromUrl(
       "opencv_face_detector.prototxt",
       "opencv_face_detector.prototxt",
       () => utils.createFileFromUrl(
-          "opencv_face_detector.caffemodel",
-          "opencv_face_detector.caffemodel",
-          () => {
-            net = cv.readNet("opencv_face_detector.prototxt", "opencv_face_detector.caffemodel");
-            captureFrame();
+        "opencv_face_detector.caffemodel",
+        "opencv_face_detector.caffemodel",
+        () => {
+              net = cv.readNet("opencv_face_detector.prototxt", "opencv_face_detector.caffemodel");
+              captureFrame();
           }
         )
-    );
-  }
-  
+      );
+    }
+    
+    
+  } 
 </script>
 
 </head>
