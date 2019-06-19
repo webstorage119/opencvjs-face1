@@ -28,10 +28,7 @@ function initDetection() {
         processingStep: processingStep
       })
     ).then(
-      objs => {
-        console.dir(objs.cameraStream);
-        return captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep);
-      }
+      objs => captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep)
     ).then(
       () => console.log('capturing started')
     );
