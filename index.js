@@ -73,13 +73,32 @@ function downloadAgeGenderNet() {
 
   const utils = new Utils('');
 
+
+  const binDownloadPromise = 
+    new Promise( (resolve, reject) => {
+      console.log('bin download');
+      try {
+        utils.createFileFromUrl(ageGenderPaths.bin, ageGenderPaths.bin, resolve)
+      } catch(err) {
+        console.error(err);
+        reject(err);
+      }
+    });
+
+  const xmlDownloadPromise = 
+    new Promise( (resolve, reject) => {
+      console.log('xml download');
+      try {
+        utils.createFileFromUrl(ageGenderPaths.xml, ageGenderPaths.xml, resolve)
+      } catch(err) {
+        console.error(err);
+        reject(err);
+      }
+    });
+
   return Promise.all([
-    new Promise( (resolve, reject) =>
-      utils.createFileFromUrl(ageGenderPaths.bin, ageGenderPaths.bin, resolve)
-    ),
-    new Promise( (resolve, reject) =>
-      utils.createFileFromUrl(ageGenderPaths.xml, ageGenderPaths.xml, resolve)
-    )
+    binDownloadPromise,
+    xmlDownloadPromise
   ])
     .then(
       () => cv.readNet(ageGenderPaths.bin, ageGenderPaths.xml)
