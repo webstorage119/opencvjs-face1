@@ -71,6 +71,7 @@ function downloadModels() {
 
 function captureFrame(cameraStream, frameBuffer, outputElement, processingStep) {
   cameraStream.read(frameBuffer);
+
   const processedFrame = processingStep(frameBuffer);
   cv.imshow(outputElement, processedFrame); 
   processedFrame.delete();
@@ -109,26 +110,43 @@ function createProcessingStep(models) {
     cv.cvtColor(frame, processedFrame, cv.COLOR_RGBA2BGR);
     const blob = cv.blobFromImage(processedFrame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
 
-    const net = models.faceDetection;
-    net.setInput(blob);
-    const out = net.forward();
-    for (let i = 0, n = out.data32F.length; i < n; i += 7) {
-      const confidence = out.data32F[i + 2];
-      if (confidence < 0.5) { continue; }
-      const left = out.data32F[i + 3] * frame.cols;
-      const top = out.data32F[i + 4] * frame.rows;
-      const right = out.data32F[i + 5] * frame.cols;
-      const bottom = out.data32F[i + 6] * frame.rows;
-      cv.rectangle(processedFrame, {x: left, y: top}, {x: right, y: bottom}, [0, 255, 0, 255]);
-    }
-    blob.delete();
-    out.delete();
+
+    const confidenceThreshold = 0.3;
+    const faceBounds = getFacesBoundingBoxes(blob, models.faceDetection, confidenceThreshold);
+
+    console.dir(faceBounds);
+
+      //cv.rectangle(processedFrame, {x: left, y: top}, {x: right, y: bottom}, [0, 255, 0, 255]);
+
 
     cv.cvtColor(processedFrame, processedFrame, cv.COLOR_BGR2RGBA);
     return processedFrame;
   };
 }
 
+
+    function getFacesBoundingBoxes(blob, net, thresh) {
+      const faceBounds = [];
+
+      net.setInput(blob);
+      const out = net.forward();
+
+      for (let i = 0, n = out.data32F.length; i < n; i += 7) {
+        const confidence = out.data32F[i + 2];
+        if (confidence < thresh) { continue; }
+        faceBounds.push({
+          left: out.data32F[i + 3] * frame.cols,
+          top: out.data32F[i + 4] * frame.rows,
+          right: out.data32F[i + 5] * frame.cols,
+          bottom: out.data32F[i + 6] * frame.rows
+        });
+
+      }
+      blob.delete();
+      out.delete();
+
+      return faceBounds;
+    }
     </script>
 
   </head>
