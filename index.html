@@ -7,76 +7,41 @@
 
     <script type='text/javascript'>
       cv['onRuntimeInitialized'] = function initDetection() {
-        // Create a camera object.
-
         const captureHeight = 480;
         const captureWidth = 640;
 
-        const output = document.getElementById('output');
-        const camera = document.createElement("video");
-
-        (
-          function setupCamera(camera, height, width) {
-            camera.setAttribute("width", width);
-            camera.setAttribute("height", height);
-
-            // Get a permission from user to use a camera.
-            navigator.mediaDevices.getUserMedia({video: true, audio: false})
-              .then(function(stream) {
-                camera.srcObject = stream;
-                camera.onloadedmetadata = function(e) {
-                  camera.play();
-                };
-              });
-
-            // return open camera stream
-           return new cv.VideoCapture(camera);
-          }
-        )(camera, captureHeight, captureWidth);
-
-        let frame = new cv.Mat(camera.height, camera.width, cv.CV_8UC4);
-        let frameBGR = new cv.Mat(camera.height, camera.width, cv.CV_8UC3);
-        let net;
+        const outputElement = document.getElementById('output');
+        const cameraElement = document.createElement("video");
 
 
+        let frame = new cv.Mat(captureHeight, captureWidth, cv.CV_8UC4);
 
 
         downloadModels()
-          .then(setupCameraStream)
-          .then(cameraStream => captureFrame(cameraStream, output))
-          .then(() => console.log('capturing started'));
-
-
-        function captureFrame(cameraStream, outputElement) {
-          cameraStream.read(frame);  // Read a frame from camera
-
-          cv.cvtColor(frame, frameBGR, cv.COLOR_RGBA2BGR);
-          const blob = cv.blobFromImage(frameBGR, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
-          net.setInput(blob);
-          const out = net.forward();
-          for (let i = 0, n = out.data32F.length; i < n; i += 7) {
-            const confidence = out.data32F[i + 2];
-            if (confidence < 0.5) { continue; }
-            const left = out.data32F[i + 3] * frame.cols;
-            const top = out.data32F[i + 4] * frame.rows;
-            const right = out.data32F[i + 5] * frame.cols;
-            const bottom = out.data32F[i + 6] * frame.rows;
-            cv.rectangle(frame, {x: left, y: top}, {x: right, y: bottom}, [0, 255, 0, 255]);
-          }
-          blob.delete();
-          out.delete();
-
-          // Visualize frame
-          cv.imshow(output, frame);
-
-          setTimeout(
-            () => captureFrame(cameraStreaa, output),
-            50 
+          .then(createProcessingStep)
+          .then(
+            processingStep => ({
+              cameraStream: setupCameraStream(cameraElement, captureHeight, captureWidth),
+              processingStep: processingStep
+            })
+          ).then(
+            objs => captureFrame(objs.cameraStream, cameraElement, objs.processingStep)
+          ).then(
+            () => console.log('capturing started')
           );
+
+
+        function captureFrame(cameraStream, outputElement, processingStep) {
+          console.log('captureFrame called');
+          cameraStream.read(frame);
+          cv.imshow(outputElement, processingStep(frame)); 
+          // Repeat every 50ms
+          setTimeout(() => captureFrame(cameraStream, output, processingStep), 50);
         };
 
 
         function downloadModels() {  
+          console.log('download models started');
           return new Promise((resolve, reject) => {
             const utils = new Utils('');
             utils.createFileFromUrl(
@@ -85,10 +50,14 @@
               () => utils.createFileFromUrl(
                 "opencv_face_detector.caffemodel",
                 "opencv_face_detector.caffemodel",
-                () => {
-                  net = cv.readNet("opencv_face_detector.prototxt", "opencv_face_detector.caffemodel");
-                  resolve();
-                }
+                () => resolve(
+                  {
+                    faceDetectionNet: cv.readNet(
+                      "opencv_face_detector.prototxt",
+                      "opencv_face_detector.caffemodel"
+                    )
+                  }
+                )
               )
             );
           });
@@ -96,6 +65,52 @@
 
 
       } 
+
+function setupCameraStream(cameraElement, height, width) {
+  cameraElement.setAttribute('width', width);
+  cameraElement.setAttribute('height', height);
+
+  // Get a permission from user to use a cameraElement.
+  navigator.mediaDevices.getUserMedia({video: true, audio: false})
+    .then((stream) => {
+      cameraElement.srcObject = stream;
+      cameraElement.onloadedmetadata = e => cameraElement.play();
+    });
+
+  // return open cameraElement stream
+  return new cv.VideoCapture(cameraElement);
+}
+
+function createProcessingStep(models) {
+  console.log('Creating processing step');
+  return function(frame) {
+    console.log('Running processing step');
+
+    const processedFrame = frame.clone();
+    cv.cvtColor(frame, processedFrame, cv.COLOR_RGBA2BGR);
+    const blob = cv.blobFromImage(frameBGR, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
+
+
+    const net = models.faceDetectionNet;
+    net.setInput(blob);
+    const out = net.forward();
+    for (let i = 0, n = out.data32F.length; i < n; i += 7) {
+      const confidence = out.data32F[i + 2];
+      if (confidence < 0.5) { continue; }
+      const left = out.data32F[i + 3] * frame.cols;
+      const top = out.data32F[i + 4] * frame.rows;
+      const right = out.data32F[i + 5] * frame.cols;
+      const bottom = out.data32F[i + 6] * frame.rows;
+      cv.rectangle(processedFrame, {x: left, y: top}, {x: right, y: bottom}, [0, 255, 0, 255]);
+    }
+    blob.delete();
+    out.delete();
+
+    cv.cvtColor(processedFrame, processedFrame, cv.COLOR_BGR2RGBA);
+    return processedFrame;
+  };
+}
+
     </script>
 
   </head>
