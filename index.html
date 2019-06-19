@@ -90,7 +90,7 @@ function setupCameraStream(cameraElement, height, width) {
   cameraElement.setAttribute('height', height);
 
   // Get a permission from user to use a cameraElement.
-  navigator.mediaDevices.getUserMedia({video: true, audio: false})
+    navigator.mediaDevices.getUserMedia({video: true, audio: false})
     .then((stream) => {
       cameraElement.srcObject = stream;
       cameraElement.onloadedmetadata = e => cameraElement.play();
@@ -114,7 +114,7 @@ function createProcessingStep(models) {
 
     console.dir(faceBounds);
 
-      //cv.rectangle(processedFrame, {x: left, y: top}, {x: right, y: bottom}, [0, 255, 0, 255]);
+    //cv.rectangle(processedFrame, {x: left, y: top}, {x: right, y: bottom}, [0, 255, 0, 255]);
 
 
     cv.cvtColor(processedFrame, processedFrame, cv.COLOR_BGR2RGBA);
@@ -123,30 +123,30 @@ function createProcessingStep(models) {
 }
 
 
-    function getFacesBoundingBoxes(frame, net, thresh) {
-      const faceBounds = [];
+function getFacesBoundingBoxes(frame, net, thresh) {
+  const faceBounds = [];
 
-      const blob = cv.blobFromImage(processedFrame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
+  const blob = cv.blobFromImage(frame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
 
-      net.setInput(blob);
-      const out = net.forward();
+  net.setInput(blob);
+  const out = net.forward();
 
-      for (let i = 0, n = out.data32F.length; i < n; i += 7) {
-        const confidence = out.data32F[i + 2];
-        if (confidence < thresh) { continue; }
-        faceBounds.push({
-          left: out.data32F[i + 3] * frame.cols,
-          top: out.data32F[i + 4] * frame.rows,
-          right: out.data32F[i + 5] * frame.cols,
-          bottom: out.data32F[i + 6] * frame.rows
-        });
+  for (let i = 0, n = out.data32F.length; i < n; i += 7) {
+    const confidence = out.data32F[i + 2];
+    if (confidence < thresh) { continue; }
+    faceBounds.push({
+      left: out.data32F[i + 3] * frame.cols,
+      top: out.data32F[i + 4] * frame.rows,
+      right: out.data32F[i + 5] * frame.cols,
+      bottom: out.data32F[i + 6] * frame.rows
+    });
 
-      }
-      blob.delete();
-      out.delete();
+  }
+  blob.delete();
+  out.delete();
 
-      return faceBounds;
-    }
+  return faceBounds;
+}
     </script>
 
   </head>
