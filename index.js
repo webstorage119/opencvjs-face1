@@ -17,10 +17,7 @@ function initDetection() {
         processingStep: processingStep
       })
     ).then(
-      objs => {
-        console.dir(objs.cameraStream);
-        return captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep);
-      }
+      objs => captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep)
     ).then(
       () => console.log('capturing started')
     );
@@ -29,21 +26,23 @@ function initDetection() {
 
 
 function downloadModels() {  
-  //console.log('download models started');
+  console.log('download models started');
 
   return Promise.all([
     downloadFaceDetectionNet(),
     downloadAgeGenderNet()
   ])
-  .then(nets => ({
+    .then(nets => ({
       faceDetection: nets[0],
       ageGender: nets[1]
     })
-  );
+    );
 }
 
 
 function downloadFaceDetectionNet() {
+  console.log('Downloading face detection network');
+
   const faceDetectionPaths = {
     proto: "opencv_face_detector.prototxt",
     caffe: "opencv_face_detector.caffemodel"
@@ -51,7 +50,7 @@ function downloadFaceDetectionNet() {
 
   const utils = new Utils('');
 
- return Promise.all([
+  return Promise.all([
     new Promise( (resolve, reject) =>
       utils.createFileFromUrl(faceDetectionPaths.proto, faceDetectionPaths.proto, resolve)
     ),
@@ -65,6 +64,8 @@ function downloadFaceDetectionNet() {
 }
 
 function downloadAgeGenderNet() {
+  console.log('Downloading age/gender network');
+
   const ageGenderPaths = {
     bin: 'age-gender-recognition-retail-0013.bin',
     xml: 'age-gender-recognition-retail-0013.xml'
@@ -72,7 +73,7 @@ function downloadAgeGenderNet() {
 
   const utils = new Utils('');
 
- return Promise.all([
+  return Promise.all([
     new Promise( (resolve, reject) =>
       utils.createFileFromUrl(ageGenderPaths.bin, ageGenderPaths.bin, resolve)
     ),
@@ -87,6 +88,8 @@ function downloadAgeGenderNet() {
 
 
 function captureFrame(cameraStream, frameBuffer, outputElement, processingStep) {
+  console.log('Capturing frame');
+
   cameraStream.read(frameBuffer);
 
   const processedFrame = processingStep(frameBuffer);
@@ -102,6 +105,8 @@ function captureFrame(cameraStream, frameBuffer, outputElement, processingStep) 
 
 
 function setupCameraStream(cameraElement, height, width) {
+  console.log('setting up camera stream');
+
   cameraElement.setAttribute('width', width);
   cameraElement.setAttribute('height', height);
 
@@ -118,6 +123,7 @@ function setupCameraStream(cameraElement, height, width) {
 
 
 function createProcessingStep(models) {
+  console.log('Creating processing steps');
   //console.log('Creating processing step');
   return function(frame) {
     //console.log('Running processing step');
@@ -138,7 +144,7 @@ function createProcessingStep(models) {
 
     }
 
-    
+
     drawBoundingBoxes(processedFrame, faceBounds, [0, 255, 0, 255]);
 
 
@@ -161,6 +167,8 @@ function drawBoundingBoxes(frame, boundingBoxes, color) {
 
 
 function getFacesBoundingBoxes(frame, net, thresh) {
+  console.log('Getting faces bounding boxes');
+
   const faceBounds = [];
 
   const blob = cv.blobFromImage(frame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
@@ -171,18 +179,18 @@ function getFacesBoundingBoxes(frame, net, thresh) {
   for (let i = 0, n = out.data32F.length; i < n; i += 7) {
     const confidence = out.data32F[i + 2];
     if (confidence < thresh) { continue; }
-      let left = out.data32F[i + 3] * frame.cols;
-      let top = out.data32F[i + 4] * frame.rows;
-      let right = out.data32F[i + 5] * frame.cols;
-      let bottom = out.data32F[i + 6] * frame.rows;
-      const width = right - left;
-      const height = bottom - top;
+    let left = out.data32F[i + 3] * frame.cols;
+    let top = out.data32F[i + 4] * frame.rows;
+    let right = out.data32F[i + 5] * frame.cols;
+    let bottom = out.data32F[i + 6] * frame.rows;
+    const width = right - left;
+    const height = bottom - top;
 
-      const scale = 0.25;
-      left -= scale*width;
-      right += scale*width;
-      top -= scale*height;
-      bottom += scale*height;
+    const scale = 0.25;
+    left -= scale*width;
+    right += scale*width;
+    top -= scale*height;
+    bottom += scale*height;
 
     faceBounds.push({
       left: (left > 0) ? left : 0,
