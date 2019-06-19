@@ -6,31 +6,35 @@
     <script src="https://docs.opencv.org/master/utils.js" type="text/javascript"></script>
 
     <script type='text/javascript'>
-      cv['onRuntimeInitialized'] = function initDetection() {
-        const captureHeight = 480;
-        const captureWidth = 640;
-
-        const outputElement = document.getElementById('output');
-        const cameraElement = document.createElement("video");
+      cv['onRuntimeInitialized'] = initDetetion;
 
 
-        let frameBuffer = new cv.Mat(captureHeight, captureWidth, cv.CV_8UC4);
+function initDetection() {
+  const captureHeight = 480;
+  const captureWidth = 640;
+
+  const outputElement = document.getElementById('output');
+  const cameraElement = document.createElement('video');
 
 
-        downloadModels()
-          .then(createProcessingStep)
-          .then(
-            processingStep => ({
-              cameraStream: setupCameraStream(cameraElement, captureHeight, captureWidth),
-              processingStep: processingStep
-            })
-          ).then(
-            objs => captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep)
-          ).then(
-            () => console.log('capturing started')
-          );
+  let frameBuffer = new cv.Mat(captureHeight, captureWidth, cv.CV_8UC4);
+  console.dir(frameBuffer);
 
-      };
+
+  downloadModels()
+    .then(createProcessingStep)
+    .then(
+      processingStep => ({
+        cameraStream: setupCameraStream(cameraElement, captureHeight, captureWidth),
+        processingStep: processingStep
+      })
+    ).then(
+      objs => captureFrame(objs.cameraStream, frameBuffer, outputElement, objs.processingStep)
+    ).then(
+      () => console.log('capturing started')
+    );
+
+}
 
 
 function downloadModels() {  
@@ -58,7 +62,7 @@ function downloadModels() {
   return Promise.all([downloadFaceDetectionPromise])
     .then(nets => ({
       faceDetection: nets[0]
-      })
+    })
     );
 }
 
