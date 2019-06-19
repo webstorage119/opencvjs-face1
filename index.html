@@ -132,6 +132,7 @@ function drawBoundingBoxes(frame, boundingBoxes, color) {
 }
 
 function getFacesBoundingBoxes(frame, net, thresh) {
+  console.dir(frame);
   const faceBounds = [];
 
   const blob = cv.blobFromImage(frame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
@@ -166,6 +167,7 @@ function getFacesBoundingBoxes(frame, net, thresh) {
   blob.delete();
   out.delete();
 
+  console.log(faceBounds);
   return faceBounds;
 }
     </script>
