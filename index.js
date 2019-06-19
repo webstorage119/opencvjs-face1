@@ -80,7 +80,7 @@ function downloadAgeGenderNet() {
       try {
         utils.createFileFromUrl(ageGenderPaths.bin, ageGenderPaths.bin, resolve)
       } catch(err) {
-        console.error(err);
+        console.log(err);
         reject(err);
       }
     });
@@ -91,7 +91,7 @@ function downloadAgeGenderNet() {
       try {
         utils.createFileFromUrl(ageGenderPaths.xml, ageGenderPaths.xml, resolve)
       } catch(err) {
-        console.error(err);
+        console.log(err);
         reject(err);
       }
     });
@@ -106,8 +106,10 @@ function downloadAgeGenderNet() {
         console.log('reading net');
         try {
           net = cv.readNet(ageGenderPaths.bin, ageGenderPaths.xml);
+          console.log('got age gender net');
+          console.dir(net);
         } catch(err) {
-          console.error(err);
+          console.log(err);
         }
 
         return net;
