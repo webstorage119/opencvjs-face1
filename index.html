@@ -88,7 +88,7 @@ function createProcessingStep(models) {
 
     const processedFrame = frame.clone();
     cv.cvtColor(frame, processedFrame, cv.COLOR_RGBA2BGR);
-    const blob = cv.blobFromImage(frameBGR, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
+    const blob = cv.blobFromImage(processedFrame, 1, {width: 192, height: 144}, [104, 117, 123, 0]);
 
 
     const net = models.faceDetectionNet;
